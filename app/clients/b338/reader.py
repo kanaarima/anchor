@@ -51,38 +51,33 @@ class Reader(BaseReader):
         return [self.stream.s32() for _ in range(self.stream.s32())]
 
     def read_message(self) -> bMessage:
-        message = bMessage(
+        return bMessage(
             sender=self.stream.string(),
             content=self.stream.string(),
-            target=self.stream.string()
+            target=self.stream.string(),
         )
-
-        return message
 
     def read_status(self) -> bStatusUpdate:
         action = ClientStatus(self.stream.u8())
-        beatmap_update = self.stream.bool()
-
-        if not beatmap_update:
+        if beatmap_update := self.stream.bool():
+            return bStatusUpdate(
+                action,
+                text=self.stream.string(),
+                beatmap_checksum=self.stream.string(),
+                mods=Mods(self.stream.u16())
+            )
+        else:
             return bStatusUpdate(action)
 
-        return bStatusUpdate(
-            action,
-            text=self.stream.string(),
-            beatmap_checksum=self.stream.string(),
-            mods=Mods(self.stream.u16())
+    def read_beatmap_request(self) -> bBeatmapInfoRequest:
+        return bBeatmapInfoRequest(
+            [self.stream.string() for _ in range(self.stream.s32())], []
         )
 
     def read_beatmap_request(self) -> bBeatmapInfoRequest:
         return bBeatmapInfoRequest(
-            [self.stream.string() for m in range(self.stream.s32())],
-            []
-        )
-
-    def read_beatmap_request(self) -> bBeatmapInfoRequest:
-        return bBeatmapInfoRequest(
-            [self.stream.string() for m in range(self.stream.s32())],
-            [self.stream.s32() for m in range(self.stream.s32())]
+            [self.stream.string() for _ in range(self.stream.s32())],
+            [self.stream.s32() for _ in range(self.stream.s32())],
         )
 
     def read_replayframe(self) -> bReplayFrame:
@@ -117,7 +112,7 @@ class Reader(BaseReader):
         )
 
     def read_replayframe_bundle(self) -> bReplayFrameBundle:
-        replay_frames = [self.read_replayframe() for f in range(self.stream.u16())]
+        replay_frames = [self.read_replayframe() for _ in range(self.stream.u16())]
         action = ReplayAction(self.stream.u8())
 
         try:

@@ -44,10 +44,7 @@ class Channel:
         if self.name.startswith('#spec_'):
             return '#spectator'
 
-        if self.name.startswith('#multi_'):
-            return '#multiplayer'
-
-        return self.name
+        return '#multiplayer' if self.name.startswith('#multi_') else self.name
 
     @property
     def user_count(self) -> int:
@@ -138,7 +135,7 @@ class Channel:
         if self.moderated:
             allowed_permissions = [Permissions.Admin, Permissions.Friend]
 
-            if not any([p in sender.permissions for p in allowed_permissions]):
+            if all(p not in sender.permissions for p in allowed_permissions):
                 return
 
         if sender.silenced:
@@ -153,7 +150,7 @@ class Channel:
 
         # Limit message size
         if len(message) > 512:
-            message = message[:512] + '... (truncated)'
+            message = f'{message[:512]}... (truncated)'
 
         self.logger.info(f'[{sender.name}]: {message}')
 
@@ -166,8 +163,8 @@ class Channel:
         # Exclude clients that only write in #osu if channel was not autojoined
         users = {
             user for user in users \
-            if user.client.version.date > 342 \
-            or self.name in config.AUTOJOIN_CHANNELS
+                if user.client.version.date > 342 \
+                or self.name in config.AUTOJOIN_CHANNELS
         }
 
         for user in users:

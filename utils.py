@@ -38,11 +38,7 @@ def is_local_ip(ip: str) -> bool:
         )
     )[0]
 
-    for net in private:
-        if (f & net[1]) == net[0]:
-            return True
-
-    return False
+    return any((f & net[1]) == net[0] for net in private)
 
 def thread_callback(error: Failure):
     app.session.logger.error(

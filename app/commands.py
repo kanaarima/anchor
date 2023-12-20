@@ -177,7 +177,7 @@ def mp_start(ctx: Context):
             return [f'Match starting in {time_remaining} seconds.']
 
         # Check if players are ready
-        if any([s.status == SlotStatus.NotReady for s in match.slots]):
+        if any(s.status == SlotStatus.NotReady for s in match.slots):
             return [f'Not all players are ready ("!{mp_commands.trigger}" {ctx.trigger} force" to start anyways)']
 
         match.start()
@@ -341,7 +341,7 @@ def mp_host(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
     match = ctx.player.match
 
     if not (target := match.get_player(name)):
@@ -374,7 +374,7 @@ def mp_invite(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
     match = ctx.player.match
 
     if name == app.session.bot_player.name:
@@ -406,7 +406,7 @@ def mp_force_invite(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
     match = ctx.player.match
 
     if not (target := app.session.players.by_name(name)):
@@ -470,7 +470,7 @@ def mp_kick(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:]).strip()
+    name = ' '.join(ctx.args[:]).strip()
     match = ctx.player.match
 
     if name == app.session.bot_player.name:
@@ -499,7 +499,7 @@ def mp_ban(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:]).strip()
+    name = ' '.join(ctx.args[:]).strip()
     match = ctx.player.match
 
     if name == app.session.bot_player.name:
@@ -525,7 +525,7 @@ def mp_unban(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:]).strip()
+    name = ' '.join(ctx.args[:]).strip()
     match = ctx.player.match
 
     if not (player := app.session.players.by_name(name)):
@@ -544,7 +544,7 @@ def mp_name(ctx: Context):
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{mp_commands.trigger} {ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:]).strip()
+    name = ' '.join(ctx.args[:]).strip()
     match = ctx.player.match
 
     match.name = name
@@ -579,7 +579,7 @@ def mp_set(ctx: Context):
 
                 slot.reset(SlotStatus.Locked)
 
-            for slot in match.slots[0:size]:
+            for slot in match.slots[:size]:
                 if slot.has_player:
                     continue
 
@@ -612,7 +612,7 @@ def mp_size(ctx: Context):
 
         slot.reset(SlotStatus.Locked)
 
-    for slot in match.slots[0:size]:
+    for slot in match.slots[:size]:
         if slot.has_player:
             continue
 
@@ -665,13 +665,11 @@ def mp_settings(ctx: Context):
         f"Team Mode: {match.team_type.name}",
         f"Win Condition: {match.scoring_type.name}",
         f"Players: {len(match.players)}",
-       *[
-            f"{match.slots.index(slot) + 1} ({slot.status.name}) - "
-            f"[http://osu.{config.DOMAIN_NAME}/u/{slot.player.id} {slot.player.name}]"
-            f"{f' +{slot.mods.short}' if slot.mods > 0 else ' '} [{f'Host' if match.host == slot.player else ''}]"
+        *[
+            f"{match.slots.index(slot) + 1} ({slot.status.name}) - [http://osu.{config.DOMAIN_NAME}/u/{slot.player.id} {slot.player.name}]{f' +{slot.mods.short}' if slot.mods > 0 else ' '} [{'Host' if match.host == slot.player else ''}]"
             for slot in match.slots
             if slot.has_player
-        ]
+        ],
     ]
 
 @mp_commands.register(['team', 'setteam'])
@@ -713,7 +711,7 @@ def mp_password(ctx: Context):
         match.update()
         return ["Match password was reset."]
 
-    match.password = ctx.args[0:]
+    match.password = ctx.args[:]
     match.update()
 
     return ["Match password was set."]
@@ -742,18 +740,13 @@ def command(
 @command(['help', 'h', ''])
 def help(ctx: Context) -> Optional[List]:
     """- Shows this message"""
-    response = []
+    response = ['Standard Commands:']
 
-    # Standard commands
-    response.append('Standard Commands:')
-    for command in commands:
-        if command.permissions not in ctx.player.permissions:
-            continue
-
-        response.append(
-            f'!{command.triggers[0].upper()} {command.doc}'
-        )
-
+    response.extend(
+        f'!{command.triggers[0].upper()} {command.doc}'
+        for command in commands
+        if command.permissions in ctx.player.permissions
+    )
     # Command sets
     for set in sets:
         if not set.commands:
@@ -843,7 +836,7 @@ def report(ctx: Context) -> Optional[List]:
 @command(['search'], Permissions.Supporter, hidden=False)
 def search(ctx: Context):
     """<query> - Search a beatmap"""
-    query = ' '.join(ctx.args[0:])
+    query = ' '.join(ctx.args[:])
 
     if len(query) <= 2:
         return ['Query too short']
@@ -869,7 +862,7 @@ def where(ctx: Context):
     if len(ctx.args) < 1:
         return [f'Invalid syntax: !{ctx.trigger} <username>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
 
     if not (target := app.session.players.by_name(name)):
         return ['Player is not online']
@@ -888,7 +881,7 @@ def get_stats(ctx: Context):
     if len(ctx.args) < 1:
         return [f'Invalid syntax: !{ctx.trigger} <username>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
 
     if not (target := app.session.players.by_name(name)):
         return ['Player is not online']
@@ -910,7 +903,7 @@ def get_client_version(ctx: Context):
     if len(ctx.args) < 1:
             return [f'Invalid syntax: !{ctx.trigger} <username>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
 
     if not (target := app.session.players.by_name(name)):
         return ['Player is not online']
@@ -924,7 +917,7 @@ def monitor(ctx: Context) -> Optional[List]:
     if len(ctx.args) < 1:
         return [f'Invalid syntax: !{ctx.trigger} <name>']
 
-    name = ' '.join(ctx.args[0:])
+    name = ' '.join(ctx.args[:])
 
     if not (player := app.session.players.by_name(name)):
         return ['Player is not online']
@@ -1074,7 +1067,7 @@ def restrict(ctx: Context) -> Optional[List]:
             action=0,
             length=until,
             description=reason,
-            is_permanent=True if not until else False
+            is_permanent=not until,
         )
     else:
         # Player is online
@@ -1093,11 +1086,7 @@ def unrestrict(ctx: Context) -> Optional[List]:
         return [f'Invalid syntax: !{ctx.trigger} <name> <restore scores (true/false)>']
 
     username = ctx.args[0]
-    restore_scores = False
-
-    if len(ctx.args) > 1:
-        restore_scores = eval(ctx.args[1].capitalize())
-
+    restore_scores = eval(ctx.args[1].capitalize()) if len(ctx.args) > 1 else False
     if not (player := users.fetch_by_name(username)):
         return [f'Player "{username}" was not found.']
 
@@ -1146,7 +1135,7 @@ def kick(ctx: Context) -> Optional[List]:
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{ctx.trigger} <username>']
 
-    username = ' '.join(ctx.args[0:])
+    username = ' '.join(ctx.args[:])
 
     if not (player := app.session.players.by_name(username)):
         return [f'User "{username}" was not found.']
@@ -1161,7 +1150,7 @@ def kill(ctx: Context) -> Optional[List]:
     if len(ctx.args) <= 0:
         return [f'Invalid syntax: !{ctx.trigger} <username>']
 
-    username = ' '.join(ctx.args[0:])
+    username = ' '.join(ctx.args[:])
 
     if not (player := app.session.players.by_name(username)):
         return [f'User "{username}" was not found.']

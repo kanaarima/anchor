@@ -138,17 +138,16 @@ class Player(BanchoProtocol):
 
     @property
     def is_bot(self) -> bool:
-        return True if self.id == -1 else False
+        return self.id == -1
 
     @property
     def silenced(self) -> bool:
         if self.object.silence_end:
             if self.remaining_silence > 0:
                 return True
-            else:
-                # User is not silenced anymore
-                self.unsilence()
-                return False
+            # User is not silenced anymore
+            self.unsilence()
+            return False
         return False
 
     @property
@@ -331,9 +330,6 @@ class Player(BanchoProtocol):
         usercount.decrement()
 
         if self.spectating:
-            if not self.spectating:
-                return
-
             # Leave spectator channel
             self.spectating.spectator_chat.remove(self)
 
@@ -487,8 +483,8 @@ class Player(BanchoProtocol):
         # Check adapters md5
         adapters_hash = hashlib.md5(client.hash.adapters.encode()).hexdigest()
 
-        if not config.DISABLE_CLIENT_VERIFICATION and not self.is_admin:
-            if not utils.valid_client_hash(self.client.hash):
+        if not utils.valid_client_hash(self.client.hash):
+            if not config.DISABLE_CLIENT_VERIFICATION and not self.is_admin:
                 self.logger.warning('Login Failed: Unsupported client')
                 self.login_failed(
                     LoginError.Authentication,
@@ -549,14 +545,7 @@ class Player(BanchoProtocol):
 
             self.enqueue_announcement(strings.MAINTENANCE_MODE_ADMIN)
 
-        if not self.is_tourney_client:
-            if (other_user := app.session.players.by_id(user.id)):
-                # Another user is online with this account
-                other_user.login_failed(
-                    LoginError.Authentication,
-                    strings.LOGGED_IN_FROM_ANOTHER_LOCATION
-                )
-        else:
+        if self.is_tourney_client:
             if not self.supporter:
                 # Trying to use tourney client without supporter
                 self.login_failed(LoginError.Authentication)
@@ -570,6 +559,12 @@ class Player(BanchoProtocol):
                 self.close_connection()
                 return
 
+        elif (other_user := app.session.players.by_id(user.id)):
+            # Another user is online with this account
+            other_user.login_failed(
+                LoginError.Authentication,
+                strings.LOGGED_IN_FROM_ANOTHER_LOCATION
+            )
         self.status.mode = GameMode(self.object.preferred_mode)
 
         if not self.stats:
@@ -831,10 +826,8 @@ class Player(BanchoProtocol):
             self.id,
             action=0,
             length=until,
-            is_permanent=True
-                    if not until
-                    else False,
-            description=f'{"Autoban: " if autoban else ""}{reason}'
+            is_permanent=not until,
+            description=f'{"Autoban: " if autoban else ""}{reason}',
         )
 
         self.logger.warning(
@@ -889,11 +882,10 @@ class Player(BanchoProtocol):
             players.remove(app.session.bot_player)
 
         if self.client.version.date <= 1710:
-            if stats_only:
-                for player in players:
+            for player in players:
+                if stats_only:
                     self.enqueue_stats(player)
-            else:
-                for player in players:
+                else:
                     self.enqueue_presence(player)
             return
 

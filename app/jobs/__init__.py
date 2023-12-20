@@ -22,7 +22,7 @@ class Jobs(ThreadPoolExecutor):
         return future
 
     def sleep(self, seconds: int):
-        for _ in range(int(seconds)):
+        for _ in range(seconds):
             if self._shutdown:
                 # Exit thread
                 exit()

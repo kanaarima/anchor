@@ -76,8 +76,8 @@ class Reader(BaseReader):
 
     def read_beatmap_request(self) -> bBeatmapInfoRequest:
         return bBeatmapInfoRequest(
-            [self.stream.string() for m in range(self.stream.s32())],
-            [self.stream.s32() for m in range(self.stream.s32())]
+            [self.stream.string() for _ in range(self.stream.s32())],
+            [self.stream.s32() for _ in range(self.stream.s32())],
         )
 
     def read_replayframe(self) -> bReplayFrame:
@@ -109,7 +109,7 @@ class Reader(BaseReader):
 
     def read_replayframe_bundle(self) -> bReplayFrameBundle:
         extra = self.stream.s32()
-        replay_frames = [self.read_replayframe() for f in range(self.stream.u16())]
+        replay_frames = [self.read_replayframe() for _ in range(self.stream.u16())]
         action = ReplayAction(self.stream.u8())
 
         try:

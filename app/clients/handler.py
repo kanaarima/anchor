@@ -233,7 +233,7 @@ def send_private_message(sender: Player, message: bMessage):
 
     # Limit message size
     if len(message.content) > 512:
-        message.content = message.content[:512] + '... (truncated)'
+        message.content = f'{message.content[:512]}... (truncated)'
 
     if target.away_message:
         sender.enqueue_message(
@@ -410,13 +410,9 @@ def beatmap_info(player: Player, info: bBeatmapInfoRequest, ignore_limit: bool =
         }
 
         for mode in range(4):
-            personal_best = scores.fetch_personal_best(
-                beatmap.id,
-                player.id,
-                mode
-            )
-
-            if personal_best:
+            if personal_best := scores.fetch_personal_best(
+                beatmap.id, player.id, mode
+            ):
                 grades[mode] = Grade[personal_best.grade]
 
         map_infos.append(
@@ -747,18 +743,15 @@ def leave_match(player: Player):
 
         match_id = player.match.db_match.id
 
-        last_game = events.fetch_last_by_type(
-            match_id,
-            type=EventType.Start
-        )
-
-        if not last_game:
-            # No games were played
-            matches.delete(match_id)
-        else:
+        if last_game := events.fetch_last_by_type(
+            match_id, type=EventType.Start
+        ):
             matches.update(match_id, {'ended_at': datetime.now()})
             events.create(match_id, type=EventType.Disband)
 
+        else:
+            # No games were played
+            matches.delete(match_id)
         player.match.logger.info('Match was disbanded.')
     else:
         if player is player.match.host:
@@ -828,10 +821,7 @@ def change_beatmap(player: Player, new_match: bMatch):
     # Unready players with no beatmap
     match.unready_players(SlotStatus.NoMap)
 
-    # Lookup beatmap in database
-    beatmap = beatmaps.fetch_by_checksum(new_match.beatmap_checksum)
-
-    if beatmap:
+    if beatmap := beatmaps.fetch_by_checksum(new_match.beatmap_checksum):
         match.beatmap_id   = beatmap.id
         match.beatmap_hash = beatmap.md5
         match.beatmap_name = beatmap.full_name
@@ -1139,7 +1129,7 @@ def match_complete(player: Player):
 
     slot.status = SlotStatus.Complete
 
-    if any([slot.is_playing for slot in player.match.slots]):
+    if any(slot.is_playing for slot in player.match.slots):
         return
 
     # Players that have been playing this round
@@ -1160,12 +1150,9 @@ def match_complete(player: Player):
     player.match.logger.info('Match finished')
     player.match.update()
 
-    start_event = events.fetch_last_by_type(
-        player.match.db_match.id,
-        type=EventType.Start
-    )
-
-    if start_event:
+    if start_event := events.fetch_last_by_type(
+        player.match.db_match.id, type=EventType.Start
+    ):
         ranking_type = {
             MatchScoringTypes.Score: lambda s: s.last_frame.total_score,
             MatchScoringTypes.Accuracy: lambda s: s.last_frame.accuracy(player.match.mode),

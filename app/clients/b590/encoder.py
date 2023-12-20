@@ -21,11 +21,7 @@ def send_login_reply(reply: int):
         # Login Errors < -2 are not supported
         reply = -1
 
-    return int(reply).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return reply.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.NEW_MATCH)
 def new_match(match: bMatch):
