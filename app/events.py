@@ -102,7 +102,7 @@ def restrict(
             action=0,
             length=until,
             description=reason,
-            is_permanent=True if not until else False
+            is_permanent=not until,
         )
 
         app.session.logger.warning(
@@ -175,9 +175,6 @@ def osu_error(user_id: int, error: dict):
     # gets forced to the menu screen. In this state, everything
     # is a little buggy, but aborting the match fixes pretty much everything.
     if player.match and player.match.in_progress:
-        if not player.match.in_progress:
-            return
-
         player.match.abort()
         player.match.chat.send_message(
             app.session.bot_player,

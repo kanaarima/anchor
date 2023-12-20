@@ -83,22 +83,19 @@ class Reader(BaseReader):
 
     def read_status(self) -> bStatusUpdate:
         action = ClientStatus(self.stream.u8())
-        beatmap_update = self.stream.bool()
-
-        if not beatmap_update:
+        if beatmap_update := self.stream.bool():
+            return bStatusUpdate(
+                action,
+                text=self.stream.string(),
+                beatmap_checksum=self.stream.string(),
+                mods=Mods(self.stream.u16())
+            )
+        else:
             return bStatusUpdate(action)
-
-        return bStatusUpdate(
-            action,
-            text=self.stream.string(),
-            beatmap_checksum=self.stream.string(),
-            mods=Mods(self.stream.u16())
-        )
 
     def read_beatmap_request(self) -> bBeatmapInfoRequest:
         return bBeatmapInfoRequest(
-            [self.stream.string() for m in range(self.stream.s32())],
-            []
+            [self.stream.string() for _ in range(self.stream.s32())], []
         )
 
     def read_scoreframe(self) -> bScoreFrame:

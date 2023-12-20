@@ -122,11 +122,7 @@ class BanchoProtocol(Protocol):
 
                 try:
                     packet = stream.u16()
-                    if self.client.version.date > 323:
-                        compression = stream.bool()
-                    else:
-                        # In version b323 and below, the compression is enabled by default
-                        compression = True
+                    compression = stream.bool() if self.client.version.date > 323 else True
                     payload = stream.read(stream.u32())
                 except OverflowError:
                     # Wait for next buffer

@@ -85,10 +85,10 @@ class Reader(BaseReader):
         )
 
     def read_beatmap_request(self) -> bBeatmapInfoRequest:
-        filenames = [self.stream.string() for m in range(self.stream.s32())]
+        filenames = [self.stream.string() for _ in range(self.stream.s32())]
 
         try:
-            ids = [self.stream.s32() for m in range(self.stream.s32())]
+            ids = [self.stream.s32() for _ in range(self.stream.s32())]
         except OverflowError:
             ids = []
 

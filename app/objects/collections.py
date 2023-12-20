@@ -60,10 +60,7 @@ class Players(List[Player]):
         for p in self.normal_clients:
             if p.id == id:
                 return p
-        for p in self.tourney_clients:
-            if p.id == id:
-                return p
-        return None
+        return next((p for p in self.tourney_clients if p.id == id), None)
 
     def by_name(self, name: str) -> Optional[Player]:
         if name == app.session.bot_player.name:
@@ -72,10 +69,7 @@ class Players(List[Player]):
         for p in self.normal_clients:
             if p.name == name:
                 return p
-        for p in self.tourney_clients:
-            if p.name == name:
-                return p
-        return None
+        return next((p for p in self.tourney_clients if p.name == name), None)
 
     def get_all_tourney_clients(self, id: int) -> List[Player]:
         return [p for p in self.tourney_clients if p.id == id]
@@ -133,10 +127,7 @@ class Channels(List[Channel]):
         return {c for c in self if c.public}
 
     def by_name(self, name: str) -> Optional[Channel]:
-        for c in self:
-            if c.name == name:
-                return c
-        return None
+        return next((c for c in self if c.name == name), None)
 
     def append(self, c: Channel) -> None:
         if not c:
@@ -174,10 +165,7 @@ class Matches(List[Optional[Match]]):
         return [m for m in self if m]
 
     def get_free(self) -> Optional[int]:
-        for index, match in enumerate(self):
-            if match is None:
-                return index
-        return None
+        return next((index for index, match in enumerate(self) if match is None), None)
 
     def append(self, match: Match) -> bool:
         if (free := self.get_free()) is not None:

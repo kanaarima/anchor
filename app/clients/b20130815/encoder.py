@@ -29,19 +29,11 @@ def register(packet: ResponsePacket) -> Callable:
 
 @register(ResponsePacket.LOGIN_REPLY)
 def send_login_reply(reply: int):
-    return int(reply).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return reply.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.PROTOCOL_VERSION)
 def send_protocol_version(version: int):
-    return int(version).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return version.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.LOGIN_PERMISSIONS)
 def send_permissions(permissions: Permissions):
@@ -100,11 +92,7 @@ def send_stats(stats: bUserStats):
 
 @register(ResponsePacket.USER_PRESENCE_SINGLE)
 def send_player(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.USER_PRESENCE_BUNDLE)
 def send_players(player_ids: List[int]):
@@ -167,19 +155,11 @@ def send_message(msg: bMessage):
 
 @register(ResponsePacket.SPECTATOR_JOINED)
 def spectator_joined(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.SPECTATOR_LEFT)
 def spectator_left(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.SPECTATE_FRAMES)
 def spectate_frames(bundle: bReplayFrameBundle):
@@ -189,43 +169,23 @@ def spectate_frames(bundle: bReplayFrameBundle):
 
 @register(ResponsePacket.CANT_SPECTATE)
 def cant_spectate(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.FELLOW_SPECTATOR_JOINED)
 def fellow_spectator_joined(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.FELLOW_SPECTATOR_LEFT)
 def fellow_spectator_left(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.LOBBY_JOIN)
 def lobby_join(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.LOBBY_PART)
 def lobby_part(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.NEW_MATCH)
 def new_match(match: bMatch):
@@ -241,11 +201,7 @@ def update_match(match: bMatch):
 
 @register(ResponsePacket.DISBAND_MATCH)
 def disband_match(match_id: int):
-    return int(match_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return match_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.MATCH_JOIN_SUCCESS)
 def match_join_success(match: bMatch):
@@ -285,19 +241,11 @@ def all_players_loaded():
 
 @register(ResponsePacket.MATCH_PLAYER_FAILED)
 def match_player_failed(slot_id: int):
-    return int(slot_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return slot_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.MATCH_PLAYER_SKIPPED)
 def match_player_skipped(slot_id: int):
-    return int(slot_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return slot_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.MATCH_SKIP)
 def match_skip():
@@ -321,19 +269,11 @@ def beatmap_info_reply(reply: bBeatmapInfoReply):
 
 @register(ResponsePacket.SILENCE_INFO)
 def silence_info(time: int):
-    return int(time).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return time.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.USER_SILENCED)
 def user_silenced(player_id: int):
-    return int(player_id).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return player_id.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.USER_DM_BLOCKED)
 def dm_blocked(msg: bMessage):
@@ -361,11 +301,7 @@ def switch_to_backup():
 
 @register(ResponsePacket.RESTART)
 def restarting(retry_in_ms: int):
-    return int(retry_in_ms).to_bytes(
-        length=4,
-        byteorder='little',
-        signed=True
-    )
+    return retry_in_ms.to_bytes(length=4, byteorder='little', signed=True)
 
 @register(ResponsePacket.UNAUTHORIZED)
 def unauthorized_build():

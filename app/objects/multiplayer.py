@@ -196,15 +196,19 @@ class Match:
 
     @property
     def host_slot(self) -> Optional[Slot]:
-        for slot in self.slots:
-            if slot.status.value & SlotStatus.HasPlayer.value and slot.player is self.host:
-                return slot
-
-        return None
+        return next(
+            (
+                slot
+                for slot in self.slots
+                if slot.status.value & SlotStatus.HasPlayer.value
+                and slot.player is self.host
+            ),
+            None,
+        )
 
     @property
     def ffa(self) -> bool:
-        return True if self.team_type in [MatchTeamTypes.TagTeamVs, MatchTeamTypes.TeamVs] else False
+        return self.team_type in [MatchTeamTypes.TagTeamVs, MatchTeamTypes.TeamVs]
 
     @property
     def player_slots(self) -> List[Slot]:
@@ -228,38 +232,40 @@ class Match:
         ]
 
     def get_slot(self, player: Player) -> Optional[Slot]:
-        for slot in self.slots:
-            if player is slot.player:
-                return slot
-
-        return None
+        return next((slot for slot in self.slots if player is slot.player), None)
 
     def get_slot_id(self, player: Player) -> Optional[int]:
-        for index, slot in enumerate(self.slots):
-            if player is slot.player:
-                return index
-
-        return None
+        return next(
+            (
+                index
+                for index, slot in enumerate(self.slots)
+                if player is slot.player
+            ),
+            None,
+        )
 
     def get_slot_with_id(self, player: Player) -> Optional[Tuple[Slot, int]]:
-        for index, slot in enumerate(self.slots):
-            if player is slot.player:
-                return slot, index
-
-        return None, None
+        return next(
+            (
+                (slot, index)
+                for index, slot in enumerate(self.slots)
+                if player is slot.player
+            ),
+            (None, None),
+        )
 
     def get_free(self) -> Optional[int]:
-        for index, slot in enumerate(self.slots):
-            if slot.status == SlotStatus.Open:
-                return index
-
-        return None
+        return next(
+            (
+                index
+                for index, slot in enumerate(self.slots)
+                if slot.status == SlotStatus.Open
+            ),
+            None,
+        )
 
     def get_player(self, name: str) -> Optional[Player]:
-        for player in self.players:
-            if player.name == name:
-                return player
-        return None
+        return next((player for player in self.players if player.name == name), None)
 
     def update(self, lobby=True) -> None:
         # Enqueue to our players
@@ -332,10 +338,7 @@ class Match:
             # Unready players with no beatmap
             self.unready_players(SlotStatus.NoMap)
 
-            # Lookup beatmap in database
-            beatmap = beatmaps.fetch_by_checksum(new_match.beatmap_checksum)
-
-            if beatmap:
+            if beatmap := beatmaps.fetch_by_checksum(new_match.beatmap_checksum):
                 self.beatmap_id   = beatmap.id
                 self.beatmap_hash = beatmap.md5
                 self.beatmap_name = beatmap.full_name
@@ -465,17 +468,14 @@ class Match:
 
         app.session.channels.remove(self.chat)
 
-        last_game = events.fetch_last_by_type(
-            self.db_match.id,
-            type=EventType.Start
-        )
-
-        if not last_game:
-            # No games were played
-            matches.delete(self.db_match.id)
-        else:
+        if last_game := events.fetch_last_by_type(
+            self.db_match.id, type=EventType.Start
+        ):
             matches.update(self.db_match.id, {'ended_at': datetime.now()})
             events.create(self.db_match.id, type=EventType.Disband)
+        else:
+            # No games were played
+            matches.delete(self.db_match.id)
 
     def start(self):
         if self.player_count <= 0:
